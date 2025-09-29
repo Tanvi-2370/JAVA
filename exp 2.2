@@ -1,0 +1,107 @@
+import java.io.*;
+import java.util.*;
+
+class Student implements Serializable {
+    int studentID;
+    String name;
+    String grade;
+    Student(int id, String n, String g) {
+        this.studentID = id;
+        this.name = n;
+        this.grade = g;
+    }
+    public String toString() {
+        return "ID: " + studentID + ", Name: " + name + ", Grade: " + grade;
+    }
+}
+
+class Employee implements Serializable {
+    int id;
+    String name;
+    String designation;
+    double salary;
+    Employee(int id, String n, String d, double s) {
+        this.id = id;
+        this.name = n;
+        this.designation = d;
+        this.salary = s;
+    }
+    public String toString() {
+        return "ID: " + id + ", Name: " + name + ", Designation: " + designation + ", Salary: " + salary;
+    }
+}
+
+public class CombinedProgram {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List<Integer> numbers = new ArrayList<>();
+        System.out.println("Enter integers (type 'done' to finish):");
+        while (true) {
+            String input = sc.next();
+            if (input.equalsIgnoreCase("done")) break;
+            numbers.add(Integer.parseInt(input));
+        }
+        int sum = 0;
+        for (Integer i : numbers) sum += i;
+        System.out.println("Sum of integers: " + sum);
+
+        try {
+            Student st = new Student(1, "Tanvi", "A");
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("student.ser"));
+            oos.writeObject(st);
+            oos.close();
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("student.ser"));
+            Student s = (Student) ois.readObject();
+            ois.close();
+            System.out.println("Deserialized Student: " + s);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        while (true) {
+            System.out.println("\nEmployee Management System");
+            System.out.println("1. Add Employee");
+            System.out.println("2. Display All Employees");
+            System.out.println("3. Exit");
+            int choice = sc.nextInt();
+            if (choice == 1) {
+                try {
+                    System.out.print("Enter ID: ");
+                    int id = sc.nextInt();
+                    sc.nextLine();
+                    System.out.print("Enter Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter Designation: ");
+                    String des = sc.nextLine();
+                    System.out.print("Enter Salary: ");
+                    double sal = sc.nextDouble();
+                    Employee emp = new Employee(id, name, des, sal);
+                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("employees.ser", true)) {
+                        protected void writeStreamHeader() throws IOException {
+                            reset();
+                        }
+                    };
+                    oos.writeObject(emp);
+                    oos.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if (choice == 2) {
+                try {
+                    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("employees.ser"));
+                    while (true) {
+                        Employee emp = (Employee) ois.readObject();
+                        System.out.println(emp);
+                    }
+                } catch (EOFException e) {
+                    System.out.println("End of employee list.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if (choice == 3) {
+                System.out.println("Exiting...");
+                break;
+            }
+        }
+    }
+}
